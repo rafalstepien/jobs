@@ -219,18 +219,18 @@
                     <div class="job-header">
                         <div class="job-title"><a href="{{ job.url }}">{{ job.title }}</a></div>
                         <div class="job-meta">
+                            {% if job.seniority %}
+                            <span class="badge badge-seniority">{{ job.seniority|capitalize }}</span>
+                            {% endif %}
                             {% if job.location_city %}
                             <span class="meta-item"> 📍 {{ job.location_city }} ({{ job.remote_options|capitalize }}) </span>
                             {% endif %}
                             {% if job.salary_min and job.salary_max and job.salary_currency and job.salary_per %}
-                            <span class="meta-item">💰 {{ job.salary_min }} - {{ job.salary_max }} {{ job.salary_currency }} / {{ job.salary_per|lower }}</span>
+                            <span class="meta-item">💰 {{ job.salary_min|format_number }} - {{ job.salary_max|format_number }} {{ job.salary_currency }} / {{ job.salary_per|lower }}</span>
                             {% elif job.salary_min and job.salary_max %}
-                            <span class="meta-item">💰 {{ job.salary_min }} - {{ job.salary_max }}</span>
+                            <span class="meta-item">💰 {{ job.salary_min|format_number }} - {{ job.salary_max|format_number }}</span>
                             {% else %}
                             <span class="meta-item">💰 Undisclosed </span>
-                            {% endif %}
-                            {% if job.seniority %}
-                            <span class="badge badge-seniority">{{ job.seniority|capitalize }}</span>
                             {% endif %}
                         </div>
                     </div>

@@ -10,6 +10,12 @@ class TechStackEntry:
     technology: str
     level_of_advancement: str
 
+    def as_dict(self) -> dict:
+        return {
+            "technology": self.technology,
+            "level_of_advancement": self.level_of_advancement,
+        }
+
 
 @dataclass(frozen=True, slots=True)
 class RawJobOffer:
@@ -17,7 +23,8 @@ class RawJobOffer:
     url: str
 
 
-class JobOffer(BaseModel):
+@dataclass
+class JobOffer:
     title: str
     text: str
     tech_stack: list[TechStackEntry]
@@ -42,3 +49,23 @@ class JobOffer(BaseModel):
             )
             for c in criteria
         )
+
+    def as_dict(self) -> dict:
+        base_data = {
+            "title": self.title,
+            "text": self.text,
+            "tech_stack": [ts.as_dict() for ts in self.tech_stack],
+            "location_country": self.location_country,
+            "location_city": self.location_city,
+            "remote_options": self.remote_options,
+            "seniority": self.seniority,
+        }
+        if all((self.salary_min, self.salary_max, self.salary_currency, self.salary_per)):
+            return {
+                **base_data,
+                "salary_min": self.salary_min,
+                "salary_max": self.salary_max,
+                "salary_currency": self.salary_currency,
+                "salary_per": self.salary_per,
+            }
+        return base_data
