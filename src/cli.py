@@ -1,5 +1,6 @@
-import click
 from datetime import datetime
+
+import click
 
 from criteria import CriteriaRule, LocationCriteria, LocationKeyword, TechCriteria, TechKeyword
 from jjit_board_parser import JJITBoardParser
@@ -13,11 +14,12 @@ def main():
 
 
 @main.command()
-# TODO: @click.option('--criteria-file', default='Standard', help='The name of the report.') 
-@click.option('--output-file-name', default='jobs_report', help='The name of the file that will be produced as output without extension.')
-def generate(
-    output_file_name: str
-):
+@click.option(
+    "--output-file-name",
+    default="jobs_report",
+    help="The name of the file that will be produced as output without extension.",
+)
+def generate(output_file_name: str):
     criteria = [
         TechCriteria(
             keywords=[TechKeyword(name="Rust"), TechKeyword(name="Python")],
@@ -41,9 +43,9 @@ def generate(
     output_file_path = f"{output_file_name}.html"
     with open(output_file_path, "w") as f:
         f.write(html_output)
-    
-    click.secho(f"Report saved as {output_file_path}", fg='green')
+
+    click.secho(f"Report saved as {output_file_path}", fg="green")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,6 +1,8 @@
-from criteria import BaseCriteria
 from dataclasses import dataclass
+
 from pydantic import BaseModel
+
+from criteria import BaseCriteria
 
 
 @dataclass(frozen=True, slots=True)
@@ -15,7 +17,6 @@ class RawJobOffer:
     url: str
 
 
-# TODO: Consider separating models exposed in API
 class JobOffer(BaseModel):
     title: str
     text: str
@@ -32,14 +33,12 @@ class JobOffer(BaseModel):
 
     def matches_criteria(self, criteria: list[BaseCriteria]) -> bool:
         return all(
-            (
-                c.is_satisfied(
-                    context={
-                        "tech_stack": self.tech_stack,
-                        "remote_options": self.remote_options,
-                        "location_city": self.location_city,
-                    }
-                )
-                for c in criteria
+            c.is_satisfied(
+                context={
+                    "tech_stack": self.tech_stack,
+                    "remote_options": self.remote_options,
+                    "location_city": self.location_city,
+                }
             )
+            for c in criteria
         )

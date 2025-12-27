@@ -3,5 +3,5 @@ run-linters:
 	ruff format
 
 
-generate:
+report:
 	python3 src/cli.py generate

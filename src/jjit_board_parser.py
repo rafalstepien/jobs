@@ -1,23 +1,19 @@
 import json
 
 from bs4 import BeautifulSoup
+from pydantic import ValidationError
+from yarl import URL
+
 from constants import BASE_URL, SINGLE_JOB_CLASS_NAME, SINGLE_JOB_TAG_NAME
 from criteria import BaseCriteria
 from exceptions import JobOfferStructureError
-from models.third_party_responses import JustJoinITOffer
 from models.domain import (
     JobOffer,
     RawJobOffer,
     TechStackEntry,
 )
-from pydantic import ValidationError
+from models.third_party_responses import JustJoinITOffer
 from utils import open_html
-from yarl import URL
-
-# TODO:
-# 1) request actual offers
-# 2) setup sending emails
-# 3) setup scheduler
 
 
 class JJITBoardParser:
@@ -35,9 +31,6 @@ class JJITBoardParser:
 
     @classmethod
     def _get_offers_html(cls, urls: list[str]) -> list[RawJobOffer]:
-        """
-        TODO: make actual requests
-        """
         return [
             RawJobOffer(
                 html=open_html("single_offer_rust"),
@@ -103,5 +96,5 @@ class JJITBoardParser:
         levels_of_advancement = offer_soup.findAll("span", {"class": cls.CLASS_NAME_LEVELS_OF_ADVANCEMENT})
         return [
             TechStackEntry(technology=label.text, level_of_advancement=level.text)
-            for label, level in zip(technologies, levels_of_advancement)
+            for label, level in zip(technologies, levels_of_advancement, strict=True)
         ]

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Mapping
 from difflib import SequenceMatcher
 from enum import StrEnum
-from typing import Callable, Literal, Mapping
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -34,6 +35,7 @@ class BaseCriteria(BaseModel, ABC):
 
 
 RULES_MAPPING: Mapping[CriteriaRule, Callable] = {CriteriaRule.ALL: all, CriteriaRule.AT_LEAST_ONE: any}
+WORD_SIMILARITY_THRESHOLD = 0.75  # if words similarity score is less than this value, then words are not similar
 
 
 class TechCriteria(BaseCriteria):
@@ -58,9 +60,6 @@ class LocationCriteria(BaseCriteria):
     keywords: list[LocationKeyword]
 
     def is_satisfied(self, context: dict) -> bool:
-        # TODO: what if there are multiple cities in job description?
-        # TODO: what if there are multiple options specified in description
-        
         keywords_matched = []
         for keyword in self.keywords:
             keywords_matched.append(
@@ -71,5 +70,7 @@ class LocationCriteria(BaseCriteria):
 
 
 def words_are_similar(w1: str, w2: str) -> bool:
-    THRESHOLD = 0.75
-    return SequenceMatcher(None, w1.lower(), w2.lower()).ratio() >= THRESHOLD
+    """
+    Handle simple typos.
+    """
+    return SequenceMatcher(None, w1.lower(), w2.lower()).ratio() >= WORD_SIMILARITY_THRESHOLD
