@@ -1,23 +1,13 @@
-# Jobs
-
-## Goals
-1. Aggregate job offers from main job boards in Poland
-2. Expose common interface for filtering them and be able to filter in more detail (eg. `LOCATION=Wroclaw+Hybrid OR LOCATION=Remote`, `TECH_STACK=Python AND TECH_STACK=Rust`)
-3. Receive email reports on daily/weekly basis
-
-
-## Usage
-
-```bash
-make report
-```
-
-
 ## Example
+### Criteria
+Show me jobs that require both Python and Rust and allow to work remotely or hybrid from Gdansk/Warsaw:
 ```python
 criteria = [
     TechCriteria(
-        keywords=[TechKeyword(name="Rust"), TechKeyword(name="Python")],
+        keywords=[
+            TechKeyword(name="Rust"), 
+            TechKeyword(name="Python")
+        ],
         rule=CriteriaRule.ALL,
     ),
     LocationCriteria(
@@ -30,12 +20,18 @@ criteria = [
     ),
 ]
 ```
-The above criteria say:
-- Tech stack must include both Python and Rust
-- Location must be remote, or hybrid in Warsaw, or hybrid in Gdansk
-
-And produce the following example report:
+### Example report produced
 ![example_report](./example_report.png)
+
+
+
+
+## Usage
+
+```bash
+make report
+```
+
 
 ## Tasks
 Features
