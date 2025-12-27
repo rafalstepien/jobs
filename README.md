@@ -12,6 +12,31 @@
 make report
 ```
 
+
+## Example
+```python
+criteria = [
+    TechCriteria(
+        keywords=[TechKeyword(name="Rust"), TechKeyword(name="Python")],
+        rule=CriteriaRule.ALL,
+    ),
+    LocationCriteria(
+        keywords=[
+            LocationKeyword(form="hybrid", city="gdansk"),
+            LocationKeyword(form="hybrid", city="warszawa"),
+            LocationKeyword(form="remote"),
+        ],
+        rule=CriteriaRule.AT_LEAST_ONE,
+    ),
+]
+```
+The above criteria say:
+- Tech stack must include both Python and Rust
+- Location must be remote, or hybrid in Warsaw, or hybrid in Gdansk
+
+And produce the following example report:
+![example_report](./example_report.png)
+
 ## Tasks
 Features
 - request actual offers instead of preloading them from local responses

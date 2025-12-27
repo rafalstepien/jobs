@@ -28,7 +28,6 @@ def generate(output_file_name: str):
         LocationCriteria(
             keywords=[
                 LocationKeyword(form="hybrid", city="gdansk"),
-                LocationKeyword(form="hybrid", city="wroclaw"),
                 LocationKeyword(form="hybrid", city="warszawa"),
                 LocationKeyword(form="remote"),
             ],
