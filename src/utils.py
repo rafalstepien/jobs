@@ -3,7 +3,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, Template
 from yarl import URL
 
-from models.domain import WebsiteResponse
+from models.domain import WebsiteOkResponse
 
 
 def open_html(name: str) -> str:
@@ -11,17 +11,17 @@ def open_html(name: str) -> str:
         return html_file.read()
 
 
-def get_offers_html() -> list[WebsiteResponse]:
+def get_offers_html() -> list[WebsiteOkResponse]:
     return [
-        WebsiteResponse(
+        WebsiteOkResponse(
             html=open_html("single_offer_rust"),
             url=URL("https://justjoin.it/job-offer/air-space-intelligence-software-engineer-gdansk-python-e10b493e"),
         ),
-        WebsiteResponse(
+        WebsiteOkResponse(
             html=open_html("single_offer_rust2"),
             url=URL("https://justjoin.it/job-offer/hyperexponential-senior-software-engineer-rust--warszawa-python"),
         ),
-        WebsiteResponse(
+        WebsiteOkResponse(
             html=open_html("single_offer_multiple_cities"),
             url=URL(
                 "https://justjoin.it/job-offer/grid-dynamics-poland-senior-full-stack-developer-python-typescript--warszawa-python"

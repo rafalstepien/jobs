@@ -1,9 +1,11 @@
-from .domain import JobOffer, TechStackEntry, WebsiteResponse
+from .domain import JobOffer, ProgrammingLanguage, TechStackEntry, WebsiteErrorResponse, WebsiteOkResponse
 from .jjit_responses import JJITAddress, JJITLocation, JJITOffer, JJITSalary, JJITSalaryValue
 
 __all__ = [
     "TechStackEntry",
-    "WebsiteResponse",
+    "WebsiteErrorResponse",
+    "WebsiteOkResponse",
+    "ProgrammingLanguage",
     "JobOffer",
     "JJITAddress",
     "JJITLocation",

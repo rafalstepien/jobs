@@ -1,8 +1,6 @@
-from abc import ABC, abstractmethod
 from collections.abc import Callable, Mapping
 from difflib import SequenceMatcher
 from enum import StrEnum
-from typing import Literal
 
 from pydantic import BaseModel
 
@@ -11,64 +9,29 @@ class LocationKeyword(BaseModel):
     form: str
     city: str | None = None
 
-
-class TechKeyword(BaseModel):
-    name: str
-
-
-class CriteriaRule(StrEnum):
+class LocationRule(StrEnum):
     ALL = "all"
     AT_LEAST_ONE = "at_least_one"
 
 
-class CriteriaKind(StrEnum):
-    TECH = "tech"
-    LOCATION = "location"
 
-
-class BaseCriteria(BaseModel, ABC):
-    rule: CriteriaRule
-    kind: CriteriaKind
-
-    @abstractmethod
-    def is_satisfied(self, context: dict) -> bool: ...
-
-
-RULES_MAPPING: Mapping[CriteriaRule, Callable] = {CriteriaRule.ALL: all, CriteriaRule.AT_LEAST_ONE: any}
+RULES_MAPPING: Mapping[LocationRule, Callable] = {LocationRule.ALL: all, LocationRule.AT_LEAST_ONE: any}
 WORD_SIMILARITY_THRESHOLD = 0.75  # if words similarity score is less than this value, then words are not similar
 
 
-class TechCriteria(BaseCriteria):
-    kind: Literal[CriteriaKind.TECH] = CriteriaKind.TECH
-    keywords: list[TechKeyword]
-
-    def is_satisfied(self, context: dict) -> bool:
-        keywords_matched = []
-        for keyword in self.keywords:
-            keyword_appended = False
-            for tse in context.get("tech_stack"):
-                if words_are_similar(keyword.name, tse.technology):
-                    keywords_matched.append(True)
-                    keyword_appended = True
-            if not keyword_appended:
-                keywords_matched.append(False)
-        return RULES_MAPPING.get(self.rule)(keywords_matched)  # type: ignore[misc]
-
-
-class LocationCriteria(BaseCriteria):
-    kind: Literal[CriteriaKind.LOCATION] = CriteriaKind.LOCATION
+class LocationCriteria(BaseModel):
     keywords: list[LocationKeyword]
+    rule: LocationRule
 
-    def is_satisfied(self, context: dict) -> bool:
+    def is_satisfied(self, remote_options: str, city: str) -> bool:
         keywords_matched = []
         for keyword in self.keywords:
             if keyword.city:
                 keywords_matched.append(
-                    words_are_similar(keyword.form, context.get("remote_options"))
-                    and words_are_similar(keyword.city, context.get("location_city"))
+                    words_are_similar(keyword.form, remote_options) and words_are_similar(keyword.city, city)
                 )
             else:
-                keywords_matched.append(words_are_similar(keyword.form, context.get("remote_options")))
+                keywords_matched.append(words_are_similar(keyword.form, remote_options))
         return RULES_MAPPING.get(self.rule)(keywords_matched)  # type: ignore[misc]
 
 

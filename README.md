@@ -35,16 +35,20 @@ make report
 
 ## Tasks
 Features
-- request actual offers instead of preloading them from local responses
 - setup sending emails
 - setup daily/weekly scheduler
 - highlight the tech stack badges matching filters
 
 Refactor
-- Use cache
+- Cache:
+    - only individual urls, full board is downloaded always
+    - for now store it to a file to be persistent across runs
+    - each entry has: request url, time of creation, response
+    - on each run the cache entries are pre-validated, and if any of them is there longer than X, it is removed and will be re-fetched
+    - think about introducing some variability in cache entries lifetime
 - Prepare for production:
     - docker (non-root user)
-- Introduce criteria file (yaml/json) for filtering
+- Introduce additional criteria: salary, experience (exclude c-levels, exclude seniors, etc.)
 - Deploy to the could: 
     - Render:
         - Deploy via dashboard by pasting image URL and setting port, done in 2 minutes. 

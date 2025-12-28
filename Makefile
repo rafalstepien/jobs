@@ -5,4 +5,4 @@ run-linters:
 
 
 report:
-	python3 src/cli.py generate
+	python3 src/generate.py

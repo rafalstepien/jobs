@@ -1,27 +1,16 @@
 import json
-from enum import StrEnum
 
 from bs4 import BeautifulSoup
 from pydantic import ValidationError
 from yarl import URL
 
-from constants import BASE_URL, BOARD_URL__PYTHON, SINGLE_JOB_CLASS_NAME, SINGLE_JOB_TAG_NAME
-from criteria import BaseCriteria
+from constants import SINGLE_JOB_CLASS_NAME, SINGLE_JOB_TAG_NAME
+from criteria import LocationCriteria
 from exceptions import JustJoinITOfferStructureError
 from jjit_api_client import JJITAPIClient
-from models import JobOffer, TechStackEntry, WebsiteResponse
-from models.jjit_responses import JJITOffer
-from utils import get_offers_html
+from models import JJITOffer, JobOffer, ProgrammingLanguage, TechStackEntry, WebsiteOkResponse
 
 
-class Category(StrEnum):
-    PYTHON = "python"
-    AI = "ai"
-    ANALYTICS = "analytics"
-    GO = "go"
-
-    # there will be more, first we should check if any keyword from criteria matches the category and provide right url
-    # if so. if not then default to all jobs listing.
 
 
 class JJITBoardParser:
@@ -32,34 +21,43 @@ class JJITBoardParser:
     def __init__(self, api_client: JJITAPIClient):
         self.api_client = api_client
 
-    async def find_offers(self, criteria: list[BaseCriteria]) -> list[dict]:
-        board_response_text = await self.api_client.fetch_single_url(BOARD_URL__PYTHON)
-        print(board_response_text)
+    async def find_offers(
+        self,
+        include_skills: list[str],
+        location_criteria: list[LocationCriteria],
+        language: ProgrammingLanguage,
+    ) -> list[dict]:
+        board_response_text = await self.api_client.fetch_base_board(language, include_skills)
         urls = self._extract_urls_to_individual_jobs(board_response_text)
-        import pdb
+        
+        # TODO: Cache
+        # TODO: Handle pagination
+        # TODO: Test server for 100s of requests
 
-        pdb.set_trace()
-        # TODO: Do actual concurrent requests with cache
-        # TODO: Handle pagination and a lot of requests to the server
-        parsed_offers = [self._parse_offer(o) for o in get_offers_html()]
+        matched_offers = []
+        async for offer_response in self.api_client.fetch_multiple_urls(urls):
+            parsed = self._parse_offer(offer_response)
+            if parsed.matches_location_criteria(location_criteria):
+                matched_offers.append(parsed.as_dict())
+        return matched_offers
 
-        return [o.as_dict() for o in parsed_offers if o.matches_criteria(criteria)]
-
-    @classmethod
-    def _extract_urls_to_individual_jobs(cls, website_response: WebsiteResponse) -> list[URL]:
-        # Prepare for rate limiting errors
+    def _extract_urls_to_individual_jobs(self, website_response: WebsiteOkResponse) -> list[URL]:
         board_soup = BeautifulSoup(website_response.html, features="html.parser")
         offers_tags = board_soup.find_all(SINGLE_JOB_TAG_NAME, {"class": SINGLE_JOB_CLASS_NAME})
-        return [BASE_URL / job_offer_path.lstrip("/") for t in offers_tags if (job_offer_path := str(t.get("href")))]
+        return [
+            self.api_client.build_url_for_individual_offer(job_offer_path)
+            for t in offers_tags
+            if (job_offer_path := str(t.get("href")))
+        ]
 
     @classmethod
-    def _parse_offer(cls, offer: WebsiteResponse) -> JobOffer:
+    def _parse_offer(cls, offer: WebsiteOkResponse) -> JobOffer:
         offer_soup = BeautifulSoup(offer.html, features="html.parser")
         offer_data = script_tag.text if (script_tag := offer_soup.find("script", type="application/ld+json")) else None
-        if not offer_data or not offer_data.text:
+        if not offer_data:
             raise JustJoinITOfferStructureError("Tag containing necessary info not found")
         try:
-            offer_data_json = JJITOffer(**json.loads(offer_data.text))
+            offer_data_json = JJITOffer(**json.loads(offer_data))
         except ValidationError as e:
             raise JustJoinITOfferStructureError("HTML file had different structure than expected") from e
 
@@ -79,6 +77,7 @@ class JJITBoardParser:
             partial_offer.salary_max = offer_data_json.salary.value.max
             partial_offer.salary_currency = offer_data_json.salary.currency
             partial_offer.salary_per = offer_data_json.salary.value.per
+
         return partial_offer
 
     @classmethod
@@ -102,7 +101,7 @@ class JJITBoardParser:
         levels_of_advancement = offer_soup.find_all("span", {"class": cls.CLASS_NAME_LEVELS_OF_ADVANCEMENT})
         if not technologies or not levels_of_advancement:
             raise JustJoinITOfferStructureError(
-                f"Tech stack data missing.Technologies: {technologies}, levels of advancement: {levels_of_advancement}"
+                f"Tech stack data missing. Technologies: {technologies}, levels of advancement: {levels_of_advancement}"
             )
         if len(technologies) != len(levels_of_advancement):
             raise JustJoinITOfferStructureError("Length of technologies list and level of advancement differ.")

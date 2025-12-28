@@ -1,8 +1,16 @@
 from dataclasses import dataclass
+from enum import StrEnum
 
 from yarl import URL
 
-from criteria import BaseCriteria
+from criteria import LocationCriteria
+
+
+class ProgrammingLanguage(StrEnum):
+    PYTHON = "python"
+    AI = "ai"
+    ANALYTICS = "analytics"
+    GO = "go"
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,9 +26,16 @@ class TechStackEntry:
 
 
 @dataclass(frozen=True, slots=True)
-class WebsiteResponse:
+class WebsiteOkResponse:
     html: str
     url: URL
+
+
+@dataclass(frozen=True, slots=True)
+class WebsiteErrorResponse:
+    url: URL
+    msg: str
+    status: int | None = None
 
 
 @dataclass
@@ -38,17 +53,8 @@ class JobOffer:
     salary_currency: str | None = None
     salary_per: str | None = None
 
-    def matches_criteria(self, criteria: list[BaseCriteria]) -> bool:
-        return all(
-            c.is_satisfied(
-                context={
-                    "tech_stack": self.tech_stack,
-                    "remote_options": self.remote_options,
-                    "location_city": self.location_city,
-                }
-            )
-            for c in criteria
-        )
+    def matches_location_criteria(self, location_criteria: list[LocationCriteria]):
+        return all(c.is_satisfied(self.remote_options, self.location_city) for c in location_criteria)
 
     def as_dict(self) -> dict:
         base_data = {
@@ -59,6 +65,7 @@ class JobOffer:
             "location_city": self.location_city,
             "remote_options": self.remote_options,
             "seniority": self.seniority,
+            "url": str(self.url),
         }
         if all((self.salary_min, self.salary_max, self.salary_currency, self.salary_per)):
             return {
