@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from pydantic import BaseModel
+from yarl import URL
 
 from criteria import BaseCriteria
 
@@ -18,9 +18,9 @@ class TechStackEntry:
 
 
 @dataclass(frozen=True, slots=True)
-class RawJobOffer:
+class WebsiteResponse:
     html: str
-    url: str
+    url: URL
 
 
 @dataclass
@@ -32,7 +32,7 @@ class JobOffer:
     location_city: str
     remote_options: str
     seniority: str
-    url: str
+    url: URL
     salary_min: int | None = None
     salary_max: int | None = None
     salary_currency: str | None = None

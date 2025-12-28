@@ -1,6 +1,7 @@
 run-linters:
-	ruff check --fix
 	ruff format
+	ruff check --fix
+	mypy .
 
 
 report:

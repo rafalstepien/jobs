@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 
 class LocationKeyword(BaseModel):
-    form: str | None = None
+    form: str
     city: str | None = None
 
 
@@ -52,7 +52,7 @@ class TechCriteria(BaseCriteria):
                     keyword_appended = True
             if not keyword_appended:
                 keywords_matched.append(False)
-        return RULES_MAPPING.get(self.rule)(keywords_matched)
+        return RULES_MAPPING.get(self.rule)(keywords_matched)  # type: ignore[misc]
 
 
 class LocationCriteria(BaseCriteria):
@@ -62,11 +62,14 @@ class LocationCriteria(BaseCriteria):
     def is_satisfied(self, context: dict) -> bool:
         keywords_matched = []
         for keyword in self.keywords:
-            keywords_matched.append(
-                words_are_similar(keyword.form, context.get("remote_options"))
-                and words_are_similar(keyword.city, context.get("location_city"))
-            )
-        return RULES_MAPPING.get(self.rule)(keywords_matched)
+            if keyword.city:
+                keywords_matched.append(
+                    words_are_similar(keyword.form, context.get("remote_options"))
+                    and words_are_similar(keyword.city, context.get("location_city"))
+                )
+            else:
+                keywords_matched.append(words_are_similar(keyword.form, context.get("remote_options")))
+        return RULES_MAPPING.get(self.rule)(keywords_matched)  # type: ignore[misc]
 
 
 def words_are_similar(w1: str, w2: str) -> bool:
