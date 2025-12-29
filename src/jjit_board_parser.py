@@ -11,8 +11,6 @@ from jjit_api_client import JJITAPIClient
 from models import JJITOffer, JobOffer, ProgrammingLanguage, TechStackEntry, WebsiteOkResponse
 
 
-
-
 class JJITBoardParser:
     CLASS_NAME_EXTRA_DATA = "MuiStack-root mui-aa3a55"
     CLASS_NAME_TECHNOLOGIES = "MuiTypography-root MuiTypography-subtitle2 mui-p733mp"
@@ -29,7 +27,7 @@ class JJITBoardParser:
     ) -> list[dict]:
         board_response_text = await self.api_client.fetch_base_board(language, include_skills)
         urls = self._extract_urls_to_individual_jobs(board_response_text)
-        
+
         # TODO: Cache
         # TODO: Handle pagination
         # TODO: Test server for 100s of requests

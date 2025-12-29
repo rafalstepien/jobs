@@ -11,8 +11,8 @@ from yarl import URL
 from exceptions import APIError, RetryableAPIError
 from models import ProgrammingLanguage, WebsiteErrorResponse, WebsiteOkResponse
 
-
 RETRYABLE_ERROR_CODES = (408, 429, 502, 503, 504, 500)
+
 
 class JJITAPIClient:
     def __init__(self):

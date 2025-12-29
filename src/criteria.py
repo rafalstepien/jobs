@@ -9,10 +9,10 @@ class LocationKeyword(BaseModel):
     form: str
     city: str | None = None
 
+
 class LocationRule(StrEnum):
     ALL = "all"
     AT_LEAST_ONE = "at_least_one"
-
 
 
 RULES_MAPPING: Mapping[LocationRule, Callable] = {LocationRule.ALL: all, LocationRule.AT_LEAST_ONE: any}

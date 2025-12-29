@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 
-from criteria import LocationRule, LocationCriteria, LocationKeyword
+from criteria import LocationCriteria, LocationKeyword, LocationRule
 from jjit_api_client import JJITAPIClient
 from jjit_board_parser import JJITBoardParser
 from models import ProgrammingLanguage
@@ -22,11 +22,11 @@ async def generate(output_file_name: str):
     ]
     jjit_api_client = JJITAPIClient()
     parser = JJITBoardParser(jjit_api_client)
-    
+
     jobs = await parser.find_offers(include_skills, location_criteria, language)
     template = prepare_jinja_env("report.html")
     report = template.render(jobs=jobs, report_date=datetime.now().strftime("%B %d, %Y"))
-    
+
     save_report(report, output_file_name)
     print(f"Report saved as {output_file_name}")
 
