@@ -4,11 +4,11 @@ from bs4 import BeautifulSoup
 from pydantic import ValidationError
 from yarl import URL
 
-from constants import SINGLE_JOB_CLASS_NAME, SINGLE_JOB_TAG_NAME
-from criteria import LocationCriteria
-from exceptions import JustJoinITOfferStructureError
-from jjit_api_client import JJITAPIClient
-from models import JJITOffer, JobOffer, ProgrammingLanguage, TechStackEntry, WebsiteOkResponse
+from src.constants import SINGLE_JOB_CLASS_NAME, SINGLE_JOB_TAG_NAME
+from src.criteria import LocationCriteria
+from src.exceptions import JustJoinITOfferStructureError
+from src.jjit_api_client import JJITAPIClient
+from src.models import JJITOffer, JobOffer, ProgrammingLanguage, TechStackEntry, WebsiteOkResponse
 
 
 class JJITBoardParser:

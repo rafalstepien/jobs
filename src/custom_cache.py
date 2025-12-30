@@ -17,55 +17,28 @@ class LRUCacheEntry:
             created_at=datetime.now(),
             html_content=html_content,
         )
-        
-        
-        
+
+
 class DoublyLinkedList:
-    ...
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.newest: LRUCacheEntry | None = None
+        self.oldest: LRUCacheEntry | None = None
+        self.size = 0
 
-
-class LRUCacheManager:
-    def __init__(self, entry_limit: int):
-        self.entry_limit = entry_limit
-        self._cache_entries: dict[str, LRUCacheEntry] = {}
-        self._newest = None
-        self._oldest = None
-        self._size = 0
-
-    def put(self, url: str, html_content: str) -> None:
-        e = LRUCacheEntry.build(html_content)
-        self._cache_entries[url] = e
-        self._add_node(e)
-
-    def get(self, url: str) -> LRUCacheEntry | None:
-        cache_hit = self._cache_entries.get(url)
-        self._move_node_to_front(cache_hit)
-        return cache_hit
-
-    def _add_node(self, e: LRUCacheEntry) -> None:
-        if self._newest is None:
-            self._newest = e
-            self._oldest = e
-            self._size += 1
-        elif self._size == self.entry_limit:
-            self.__remove_oldest_node()
-            self.__add_newest_node(e)
+    def add_node(self, e: LRUCacheEntry) -> None:
+        if self.newest is None:
+            self.newest = e
+            self.oldest = e
+            self.size += 1
+        elif self.size == self.capacity:
+            self._remove_oldest_node()
+            self._add_newest_node(e)
         else:
-            self.__add_newest_node(e)
-            self._size += 1
+            self._add_newest_node(e)
+            self.size += 1
 
-    def __add_newest_node(self, e: LRUCacheEntry) -> None:
-        self._newest._newer = e
-        e._older = self._newest
-        self._newest = e
-
-    def __remove_oldest_node(self) -> None:
-        newer = self._oldest._newer
-        self._oldest._newer = None
-        self._oldest = newer
-        self._oldest._older = None
-
-    def _move_node_to_front(self, node: LRUCacheEntry) -> None:
+    def move_node_to_front(self, node: LRUCacheEntry) -> None:
         older = node._older
         newer = node._newer
 
@@ -74,15 +47,15 @@ class LRUCacheManager:
 
         if not older:
             new_oldest = node._newer
-            
+
             node._newer._older = None
             node._newer = None
 
-            node._older = self._newest
-            self._newest._newer = node
-            self._newest = node
-            
-            self._oldest = new_oldest
+            node._older = self.newest
+            self.newest._newer = node
+            self.newest = node
+
+            self.oldest = new_oldest
 
         elif older:
             node._newer._older = node._older
@@ -91,6 +64,35 @@ class LRUCacheManager:
             node._older._newer = node._newer
             node._older = None
 
-            node._older = self._newest
-            self._newest._newer = node
-            self._newest = node
+            node._older = self.newest
+            self.newest._newer = node
+            self.newest = node
+
+    def _add_newest_node(self, e: LRUCacheEntry) -> None:
+        self.newest._newer = e
+        e._older = self.newest
+        self.newest = e
+
+    def _remove_oldest_node(self) -> None:
+        newer = self.oldest._newer
+        self.oldest._newer = None
+        self.oldest = newer
+        self.oldest._older = None
+
+
+class LRUCacheManager:
+    def __init__(self, capacity: int):
+        self._cache_entries: dict[str, LRUCacheEntry] = {}
+        self._order = DoublyLinkedList(capacity)
+
+    def put(self, url: str, html_content: str) -> None:
+        e = LRUCacheEntry.build(html_content)
+        self._cache_entries[url] = e
+        self._order.add_node(e)
+
+    def get(self, url: str) -> LRUCacheEntry | None:
+        cache_hit = self._cache_entries.get(url)
+        if cache_hit:
+            self._order.move_node_to_front(cache_hit)
+            return cache_hit
+        return None

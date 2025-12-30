@@ -3,7 +3,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, Template
 from yarl import URL
 
-from models.domain import WebsiteOkResponse
+from src.models.domain import WebsiteOkResponse
 
 
 def open_html(name: str) -> str:

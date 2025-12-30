@@ -1,11 +1,11 @@
 import asyncio
 from datetime import datetime
 
-from criteria import LocationCriteria, LocationKeyword, LocationRule
-from jjit_api_client import JJITAPIClient
-from jjit_board_parser import JJITBoardParser
-from models import ProgrammingLanguage
-from utils import prepare_jinja_env, save_report
+from src.criteria import LocationCriteria, LocationKeyword, LocationRule
+from src.jjit_api_client import JJITAPIClient
+from src.jjit_board_parser import JJITBoardParser
+from src.models import ProgrammingLanguage
+from src.utils import prepare_jinja_env, save_report
 
 
 async def generate(output_file_name: str):

@@ -3,7 +3,7 @@ from enum import StrEnum
 
 from yarl import URL
 
-from criteria import LocationCriteria
+from src.criteria import LocationCriteria
 
 
 class ProgrammingLanguage(StrEnum):
