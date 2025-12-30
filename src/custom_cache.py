@@ -17,6 +17,11 @@ class LRUCacheEntry:
             created_at=datetime.now(),
             html_content=html_content,
         )
+        
+        
+        
+class DoublyLinkedList:
+    ...
 
 
 class LRUCacheManager:
@@ -32,7 +37,7 @@ class LRUCacheManager:
         self._cache_entries[url] = e
         self._add_node(e)
 
-    def get(self, url: str) -> str | None:
+    def get(self, url: str) -> LRUCacheEntry | None:
         cache_hit = self._cache_entries.get(url)
         self._move_node_to_front(cache_hit)
         return cache_hit
@@ -68,18 +73,22 @@ class LRUCacheManager:
             return
 
         if not older:
+            new_oldest = node._newer
+            
             node._newer._older = None
             node._newer = None
 
             node._older = self._newest
             self._newest._newer = node
             self._newest = node
+            
+            self._oldest = new_oldest
 
         elif older:
-            node._newer._older = None
+            node._newer._older = node._older
             node._newer = None
 
-            node._older._newer = None
+            node._older._newer = node._newer
             node._older = None
 
             node._older = self._newest
